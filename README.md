@@ -1,4 +1,4 @@
-JobHunter
+Job
 ====
 
 > A demo of WebMagic.
