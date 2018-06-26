@@ -9,7 +9,6 @@ import us.codecraft.jobhunter.model.LieTouJobInfo;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
-import us.codecraft.webmagic.selector.PlainText;
 
 import javax.annotation.Resource;
 
@@ -30,7 +29,6 @@ public class LieTouProcessor implements PageProcessor {
             .setTimeOut(10000)
             .setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36");
 
-    @Override
     public void process(Page page) {
 
         if (page.getResultItems().get("name")==null){
@@ -64,7 +62,6 @@ public class LieTouProcessor implements PageProcessor {
         }
     }
 
-    @Override
     public Site getSite() {
         return site;
     }
