@@ -2,14 +2,7 @@ package us.codecraft.jobhunter.model;
 
 import lombok.NonNull;
 import org.apache.commons.codec.digest.DigestUtils;
-import us.codecraft.webmagic.Page;
-import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.model.AfterExtractor;
-import us.codecraft.webmagic.model.annotation.ExtractBy;
-import us.codecraft.webmagic.model.annotation.ExtractByUrl;
-import us.codecraft.webmagic.model.annotation.HelpUrl;
-import us.codecraft.webmagic.model.annotation.TargetUrl;
-import us.codecraft.webmagic.processor.PageProcessor;
+
 
 /**
  * @author code4crafer@gmail.com

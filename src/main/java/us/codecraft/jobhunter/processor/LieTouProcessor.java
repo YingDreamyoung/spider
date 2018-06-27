@@ -2,15 +2,19 @@ package us.codecraft.jobhunter.processor;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 import us.codecraft.jobhunter.dao.JobInfoDAO;
 import us.codecraft.jobhunter.model.LieTouJobInfo;
+import us.codecraft.jobhunter.util.RedisPoolUtil;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Component("LieTouProcessor")
 @Slf4j
@@ -38,11 +42,43 @@ public class LieTouProcessor implements PageProcessor {
 
         //列表页
         if (page.getUrl().regex(URL_LIST).match()) {
-            page.addTargetRequests(page.getHtml().xpath("//div[@class='job-info']/h3/a[@href]").links().regex(URL_POST).all());
+
+            //这里加入redis 缓存，减少服务器压力
+
+            //选取列表页里面的详情页 url
+            List<String> urlAllList=page.getHtml().xpath("//div[@class='job-info']/h3/a[@href]").links().regex(URL_POST).all();
+            String urlMd5="";
+
+            if(urlAllList!=null && !urlAllList.isEmpty()){
+                for (String url:urlAllList) {
+                    System.out.println("urlAllList {}:"+url);
+
+                    urlMd5=DigestUtils.md5Hex(url);
+                    String redisUrl = RedisPoolUtil.get(urlMd5);
+                    System.out.println("redisUrl {}:"+redisUrl);
+
+                    if(StringUtils.isNotBlank(redisUrl)){
+                        //如果 redis 中存在说明已存储
+                        //不会再爬取
+                        continue;
+                    }
+
+                    page.addTargetRequests(Lists.newArrayList(url));
+                    try {
+                        log.warn("数据存储redis: {}"+url);
+                        RedisPoolUtil.setEx(urlMd5, url,60*60*24*1);
+                    } catch (Exception e) {
+                        log.warn("数据存储redis fail: {}"+url);
+                    }
+
+                }
+
+            }
             page.addTargetRequests(Lists.newArrayList("https://www.liepin.com/zhaopin/?ckid=a3ade1a081e50e36&fromSearchBtn=2&compkind=&isAnalysis=&init=-1&searchType=1&dqs=&industryType=&jobKind=&sortFlag=15&degradeFlag=0&salary=&compscale=&key=&clean_condition=&headckid=a3ade1a081e50e36&d_pageSize=40&siTag=1B2M2Y8AsgTpgAmY7PhCfg~fA9rXquZc5IkJpXC-Ycixw&d_headId=4f984a9f0bf26d0a2b13a86b777c9c35&d_ckId=4f984a9f0bf26d0a2b13a86b777c9c35&d_sfrom=search_prime&d_curPage=0&curPage=1"));
-            page.addTargetRequests(page.getHtml().links().regex(URL_LIST).all());
+//            page.addTargetRequests(page.getHtml().links().regex(URL_LIST).all());
             //文章页
         } else {
+            System.out.println(" //文章页");
             LieTouJobInfo lieTouJobInfo=new LieTouJobInfo();
             lieTouJobInfo.setTitle(page.getHtml().xpath("//h1/text()").toString());
             lieTouJobInfo.setSalary(page.getHtml().xpath("//p[@class='job-item-title']/text()").toString());
