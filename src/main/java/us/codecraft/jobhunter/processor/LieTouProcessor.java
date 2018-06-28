@@ -15,6 +15,8 @@ import us.codecraft.webmagic.processor.PageProcessor;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component("LieTouProcessor")
 @Slf4j
@@ -54,19 +56,24 @@ public class LieTouProcessor implements PageProcessor {
                     System.out.println("urlAllList {}:"+url);
 
                     urlMd5=DigestUtils.md5Hex(url);
-                    String redisUrl = RedisPoolUtil.get(urlMd5);
+                    String redisUrl ="";
+                    redisUrl = RedisPoolUtil.get(urlMd5);
                     System.out.println("redisUrl {}:"+redisUrl);
 
                     if(StringUtils.isNotBlank(redisUrl)){
                         //如果 redis 中存在说明已存储
                         //不会再爬取
+                        log.warn("判断是否为空: {}"+StringUtils.isNotBlank(redisUrl));
                         continue;
                     }
 
                     page.addTargetRequests(Lists.newArrayList(url));
                     try {
                         log.warn("数据存储redis: {}"+url);
-                        RedisPoolUtil.setEx(urlMd5, url,60*60*24*1);
+                        Pattern pattern = Pattern.compile("[\\D]");
+                        Matcher matcher = pattern.matcher(url);
+                        String patternUrl=matcher.replaceAll("").trim();
+                        RedisPoolUtil.setEx( urlMd5,patternUrl,60*60*24*1);
                     } catch (Exception e) {
                         log.warn("数据存储redis fail: {}"+url);
                     }
@@ -100,5 +107,19 @@ public class LieTouProcessor implements PageProcessor {
 
     public Site getSite() {
         return site;
+    }
+
+    public static void main(String[] args) {
+        String url="https://www.liepin.com/job/1914641259.shtml";
+        Pattern pattern = Pattern.compile("[\\D]");
+        Matcher matcher = pattern.matcher(url);
+        String patternUrl=matcher.replaceAll("");
+        System.out.println(patternUrl);
+
+        String phoneString = "哈哈,13888889999";
+         pattern = Pattern.compile("[^0-9]");
+         matcher = pattern.matcher(phoneString);
+        String all = matcher.replaceAll("");
+        System.out.println("phone:" + all);
     }
 }

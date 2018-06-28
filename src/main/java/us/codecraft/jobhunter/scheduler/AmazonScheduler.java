@@ -25,9 +25,9 @@ public class AmazonScheduler{
     }
 
 
-    @Scheduled(cron = "1/30 * * * * ?")
+    @Scheduled(cron = "0 1/30 * * * ?")
     public void amazonScheduler(){
-        System.out.println("听说延迟1分钟，1m  触发一次"+System.currentTimeMillis());
+        System.out.println("听说延迟1分钟，30m  触发一次"+System.currentTimeMillis());
         log.info("Amazon Crawler run!");
         amazonCrawler.crawl();
         System.out.println(">>>>>>>>>>>>>>>>>>");

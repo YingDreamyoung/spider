@@ -76,9 +76,9 @@
     <!--&lt;!&ndash;</logger>&ndash;&gt;-->
 
 
-    <!--<root level="DEBUG">-->
-        <!--&lt;!&ndash;<appender-ref ref="console"/>&ndash;&gt;-->
-        <!--&lt;!&ndash;<appender-ref ref="error"/>&ndash;&gt;-->
-    <!--</root>-->
+    <root level="DEBUG">
+        <appender-ref ref="console"/>
+        <appender-ref ref="error"/>
+    </root>
 
 </configuration>
